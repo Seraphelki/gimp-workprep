@@ -10,10 +10,11 @@
     SF-IMAGE "image" 0
     SF-DRAWABLE "drawable" 0
   )
-  (script-fu-menu-register "script-fu-prep-layers" "<Image>/Layer/Prep")
-  (define (script-fu-prep-layers image drawable) ;
+  (script-fu-menu-register "script-fu-prep-layers" "<Image>/Prep")
+  (define (script-fu-prep-layers image drawable)
     (let*
-      ( ;I was just missing this one, there needs to be one encasing all the stuff you are let*-ing
+      (
+          (theInitial (car (gimp-image-get-active-layer image)))
           (theImageWidth (car (gimp-image-width image)))
           (theImageHeight
                   (car
@@ -27,7 +28,7 @@
                           theImageWidth
                           theImageHeight
                           1
-                          "Line Layer"
+                          "Lines"
                           100
                           NORMAL
                       )
@@ -40,18 +41,20 @@
                           theImageWidth
                           theImageHeight
                           1
-                          "White Layer"
+                          "White"
                           100
                           NORMAL
                       )
                   )
           )
       ) ;end local variables
-      ; will do active layer check and
-      ; opacity change on it in these lines
-      (gimp-image-add-layer image theLayer1 -1)       ;introduce layer at top of stack
-      (gimp-image-add-layer image theLayer2 0)        ;zero not correct I think, have to research smoothest way to add to bottom of stack
-      (gimp-context-set-background '(255 255 255) )   ;set color2 to White
-      (gimp-drawable-fill theLayer2 BACKGROUND-FILL)  ;colofill White Layer
+      (gimp-layer-set-opacity theInitial 30)            ;opacity change of initial layer
+      (gimp-item-set-name theInitial "Reference")       ;change initial image layer name
+      (gimp-image-insert-layer image theLayer1 0 0)     ;introduce Line layer at top of stack
+      (gimp-image-insert-layer image theLayer2 0 2)     ;introduce White layer third in stack
+      (gimp-context-set-background '(255 255 255) )     ;set color2 to White
+      (gimp-drawable-fill theLayer2 BACKGROUND-FILL)    ;fill White Layer
+      (gimp-image-set-active-layer image theLayer1)     ;set active layer to Lines
+      (gimp-displays-flush)                             ;step to refresh and show changes
     )
   )
